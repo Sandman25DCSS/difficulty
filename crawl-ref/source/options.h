@@ -270,6 +270,7 @@ public:
 
     vector<message_filter> force_more_message;
     vector<message_filter> flash_screen_message;
+    vector<text_pattern> confirm_action;
 
     int         tc_reachable;   // Colour for squares that are reachable
     int         tc_excluded;    // Colour for excluded squares.
