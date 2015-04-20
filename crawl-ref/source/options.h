@@ -271,7 +271,6 @@ public:
     vector<message_filter> force_more_message;
     vector<message_filter> flash_screen_message;
     vector<text_pattern> confirm_action;
-    
     int monster_hp_difficulty;
     int monster_xp_difficulty;
 
