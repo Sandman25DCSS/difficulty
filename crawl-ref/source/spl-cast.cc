@@ -1195,6 +1195,20 @@ int hex_success_chance(const int mr, int powc, int scale)
     return scale * _triangular_number(201 - target) / (101 * 100);
 }
 
+/**
+ * Compute to_hit chance for damaging (non-automatic) spells.
+ *
+ * @param ev The evasion of the target.
+ * @param to_hit To_hit chance of spell.
+ *
+ * @return The chance that the spell
+ * hits the target.
+ */
+int damaging_spell_to_hit_chance(const int ev, int to_hit)
+{
+    return 100 * to_hit / (to_hit + ev/2);
+}
+
 // Include success chance in targeter for spells checking monster MR.
 vector<string> desc_success_chance(const monster_info& mi, int pow)
 {
@@ -1207,6 +1221,15 @@ vector<string> desc_success_chance(const monster_info& mi, int pow)
         descs.push_back(make_stringf("chance to defeat MR: %d%%",
                                      hex_success_chance(mr, pow, 100)).c_str());
     }
+    return descs;
+}
+
+// Include to hit chance in targeter for damaging (non-automatic) hit beams.
+vector<string> desc_damaging_spell_to_hit_chance(const monster_info& mi, int to_hit)
+{
+    vector<string> descs;
+    descs.push_back(make_stringf("chance %d%%",
+                                    damaging_spell_to_hit_chance(mi.ev, to_hit)).c_str());
     return descs;
 }
 
@@ -1297,8 +1320,18 @@ spret_type your_spells(spell_type spell, int powc,
                                                 : zap_ench_power(zap, powc);
             additional_desc = bind(desc_success_chance, placeholders::_1,
                                    eff_pow);
+        } else
+        if (hitfunc)
+        {
+            targetter_beam* tbeam = dynamic_cast<targetter_beam*>(hitfunc);
+            if(tbeam)
+            {
+            int to_hit = tbeam->beam.hit;
+            if (to_hit != AUTOMATIC_HIT)
+                additional_desc = bind(desc_damaging_spell_to_hit_chance, 
+                                    placeholders::_1, to_hit);
+            }
         }
-
         string title = "Aiming: <white>";
         title += spell_title(spell);
         title += "</white>";

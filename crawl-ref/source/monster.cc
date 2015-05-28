@@ -4618,7 +4618,7 @@ int monster::hurt(const actor *agent, int amount, beam_type flavour,
         // Allow the victim to exhibit passive damage behaviour (e.g.
         // the royal jelly).
         react_to_damage(agent, amount, flavour);
-
+        
         // Don't mirror Yredelemnul's effects (in particular don't mirror
         // mirrored damage).
         if (has_ench(ENCH_MIRROR_DAMAGE)

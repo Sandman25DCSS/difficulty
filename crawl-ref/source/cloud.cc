@@ -1389,7 +1389,7 @@ int actor_apply_cloud(actor *act)
 
     if (final_damage)
     {
-        dprf("%s %s %d damage from cloud: %s.",
+        mprf("%s %s %d damage from cloud: %s.",
              act->name(DESC_THE).c_str(),
              act->conj_verb("take").c_str(),
              final_damage,

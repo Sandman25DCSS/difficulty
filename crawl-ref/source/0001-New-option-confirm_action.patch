@@ -1,0 +1,86 @@
+From d7397010f07aa2cc681cf9e53ec90b29e9ad756a Mon Sep 17 00:00:00 2001
+From: Sandman25 <Sandman25@hotmail.com>
+Date: Mon, 20 Apr 2015 18:28:24 -0400
+Subject: [PATCH] New option "confirm_action"
+
+---
+ crawl-ref/source/initfile.cc |  3 +++
+ crawl-ref/source/options.h   |  1 +
+ crawl-ref/source/spl-cast.cc | 21 +++++++++++++++++++++
+ 3 files changed, 25 insertions(+)
+
+diff --git a/crawl-ref/source/initfile.cc b/crawl-ref/source/initfile.cc
+index be70545..2b7eee1 100644
+--- a/crawl-ref/source/initfile.cc
++++ b/crawl-ref/source/initfile.cc
+@@ -1136,6 +1136,7 @@ void game_options::reset_options()
+     auto_item_letters.clear();
+     force_more_message.clear();
+     flash_screen_message.clear();
++    confirm_action.clear();
+     sound_mappings.clear();
+     menu_colour_mappings.clear();
+     message_colour_mappings.clear();
+@@ -2560,6 +2561,7 @@ void game_options::read_option_line(const string &str, bool runscript)
+         && key != "stop_travel" && key != "sound"
+         && key != "force_more_message"
+         && key != "flash_screen_message"
++        && key != "confirm_action"
+         && key != "drop_filter" && key != "lua_file" && key != "terp_file"
+         && key != "note_items" && key != "autoinscribe"
+         && key != "note_monsters" && key != "note_messages"
+@@ -3448,6 +3450,7 @@ void game_options::read_option_line(const string &str, bool runscript)
+         }
+         _merge_lists(filters, new_entries, caret_equal);
+     }
++    else LIST_OPTION(confirm_action);
+     else LIST_OPTION(drop_filter);
+     else if (key == "travel_avoid_terrain")
+     {
+diff --git a/crawl-ref/source/options.h b/crawl-ref/source/options.h
+index b7eef0f..c1fb127 100644
+--- a/crawl-ref/source/options.h
++++ b/crawl-ref/source/options.h
+@@ -270,6 +270,7 @@ public:
+ 
+     vector<message_filter> force_more_message;
+     vector<message_filter> flash_screen_message;
++    vector<text_pattern> confirm_action;
+ 
+     int         tc_reachable;   // Colour for squares that are reachable
+     int         tc_excluded;    // Colour for excluded squares.
+diff --git a/crawl-ref/source/spl-cast.cc b/crawl-ref/source/spl-cast.cc
+index 9249d2d..75f86d6 100644
+--- a/crawl-ref/source/spl-cast.cc
++++ b/crawl-ref/source/spl-cast.cc
+@@ -1031,6 +1031,27 @@ static bool _spellcasting_aborted(spell_type spell,
+ 
+     if (uncastable)
+         mpr(msg);
++    else
++    {
++        vector<text_pattern> &actions = Options.confirm_action;
++        if (!actions.empty())
++        {
++            const char* name = spell_title(spell);
++            for (const text_pattern &action : actions)
++            {
++                if (action.matches(name))
++                {   
++                    string prompt = "About to use " + string(name) + ". Continue anyway?";
++                    if (!yesno(prompt.c_str(), false, 'n'))
++                    {
++                        canned_msg(MSG_OK);
++                        return true;
++                    }
++                    break;
++                }
++            }
++        }
++    }
+ 
+     return uncastable;
+ }
+-- 
+1.8.4
+

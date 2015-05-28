@@ -227,14 +227,21 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
         crawl_state.cancel_cmd_repeat();
 
 #ifndef DEBUG_DIAGNOSTICS
-        if (at.context == SC_NEWLY_SEEN)
-        {
-            monster_info mi(mon);
-            set_auto_exclude(mon);
+        monster_info mi(mon);
+        
+        int last_turn_it_was_seen_by_player = 0;
 
-            mprf(MSGCH_WARN, "%s comes into view.",
-                 get_monster_equipment_desc(mi, DESC_WEAPON).c_str());
-        }
+        if (at.context == SC_NEWLY_SEEN)
+            set_auto_exclude(mon);
+        else
+            last_turn_it_was_seen_by_player = mon-> last_turn_it_was_seen_by_player;
+        if (at.context == SC_NEWLY_SEEN 
+            || (Options.turns_for_comes_into_view_again > 0 
+            && you.num_turns - last_turn_it_was_seen_by_player 
+            > Options.turns_for_comes_into_view_again))
+            mprf(MSGCH_WARN, "%s comes into view%s", 
+                get_monster_equipment_desc(mi, DESC_WEAPON).c_str(),
+                (at.context == SC_NEWLY_SEEN ? "." : " again."));
 
         if (crawl_state.game_is_hints())
             hints_monster_seen(*mon);

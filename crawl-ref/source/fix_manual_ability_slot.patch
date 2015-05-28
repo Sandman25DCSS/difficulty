@@ -1,0 +1,33 @@
+From 158ce750d8d478582da11c143140162e07e135e6 Mon Sep 17 00:00:00 2001
+From: Sandman25 <sandy12314@hotmail.com>
+Date: Wed, 24 Dec 2014 20:28:59 -0500
+Subject: [PATCH] fixed manual assignment of an ability
+
+---
+ crawl-ref/source/ability.cc | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/crawl-ref/source/ability.cc b/crawl-ref/source/ability.cc
+index b973f3e..8abb3d0 100644
+--- a/crawl-ref/source/ability.cc
++++ b/crawl-ref/source/ability.cc
+@@ -3872,6 +3872,7 @@ static int _auto_assign_ability_slot(ability_type abil_type, int slot)
+                 {
+                     // Unassigned or already assigned to this ability.
+                     you.ability_letter_table[index] = abil_type;
++                    you.ability_letter_table[slot] = ABIL_NON_ABILITY;
+                     return index;
+                 }
+                 else if (overwrite)
+@@ -3903,7 +3904,7 @@ static int _find_ability_slot(const ability_def &abil)
+         // its corresponding ability before comparing the two, so that
+         // we'll find the placeholder's index properly.
+         if (_fixup_ability(you.ability_letter_table[slot]) == abil.ability)
+-            return _auto_assign_ability_slot(abil_type, slot);
++            return slot;
+ 
+     // No requested slot, find new one and make it preferred.
+ 
+-- 
+1.8.4
+

@@ -1,0 +1,112 @@
+From a5e5fdec1e721703216f1a273da5d7e84d3c6082 Mon Sep 17 00:00:00 2001
+From: Sandman25 <Sandman25@hotmail.com>
+Date: Sun, 29 Mar 2015 17:59:49 -0400
+Subject: [PATCH 1/2] Display damage
+
+---
+ crawl-ref/source/melee_attack.cc  | 9 +++++----
+ crawl-ref/source/monster.cc       | 2 +-
+ crawl-ref/source/ranged_attack.cc | 5 +++--
+ 3 files changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/crawl-ref/source/melee_attack.cc b/crawl-ref/source/melee_attack.cc
+index 776479f..ff6eb67 100644
+--- a/crawl-ref/source/melee_attack.cc
++++ b/crawl-ref/source/melee_attack.cc
+@@ -1464,11 +1464,12 @@ bool melee_attack::player_aux_apply(unarmed_attack_type atk)
+ 
+ void melee_attack::player_announce_aux_hit()
+ {
+-    mprf("You %s %s%s%s",
++    mprf("You %s %s%s%s(damage %d)",
+          aux_verb.c_str(),
+          defender->name(DESC_THE).c_str(),
+          debug_damage_number().c_str(),
+-         attack_strength_punctuation(damage_done).c_str());
++         attack_strength_punctuation(damage_done).c_str(),
++         damage_done);
+ }
+ 
+ string melee_attack::player_why_missed()
+@@ -2533,11 +2534,11 @@ void melee_attack::announce_hit()
+             verb_degree = " " + verb_degree;
+         }
+ 
+-        mprf("You %s %s%s%s%s",
++        mprf("You %s %s%s%s%s(damage %d)",
+              attack_verb.c_str(),
+              defender->name(DESC_THE).c_str(),
+              verb_degree.c_str(), debug_damage_number().c_str(),
+-             attack_strength_punctuation(damage_done).c_str());
++             attack_strength_punctuation(damage_done).c_str(), damage_done);
+     }
+ }
+ 
+diff --git a/crawl-ref/source/monster.cc b/crawl-ref/source/monster.cc
+index 8968a0a..3b06799 100644
+--- a/crawl-ref/source/monster.cc
++++ b/crawl-ref/source/monster.cc
+@@ -4657,7 +4657,7 @@ int monster::hurt(const actor *agent, int amount, beam_type flavour,
+         // Allow the victim to exhibit passive damage behaviour (e.g.
+         // the royal jelly).
+         react_to_damage(agent, amount, flavour);
+-
++        
+         // Don't mirror Yredelemnul's effects (in particular don't mirror
+         // mirrored damage).
+         if (has_ench(ENCH_MIRROR_DAMAGE)
+diff --git a/crawl-ref/source/ranged_attack.cc b/crawl-ref/source/ranged_attack.cc
+index e5aa655..9866b05 100644
+--- a/crawl-ref/source/ranged_attack.cc
++++ b/crawl-ref/source/ranged_attack.cc
+@@ -844,7 +844,7 @@ void ranged_attack::announce_hit()
+     if (!needs_message)
+         return;
+ 
+-    mprf("%s %s %s%s%s%s",
++    mprf("%s %s %s%s%s%s(damage %d)",
+          projectile->name(DESC_THE).c_str(),
+          attack_verb.c_str(),
+          defender_name(false).c_str(),
+@@ -852,5 +852,6 @@ void ranged_attack::announce_hit()
+              ? " in a vulnerable spot"
+              : "",
+          debug_damage_number().c_str(),
+-         attack_strength_punctuation(damage_done).c_str());
++         attack_strength_punctuation(damage_done).c_str(),
++         damage_done);
+ }
+-- 
+1.8.4
+
+
+From f11e6e10f08c4ee2372023ddb426f7f1481eb751 Mon Sep 17 00:00:00 2001
+From: Sandman25 <Sandman25@hotmail.com>
+Date: Sun, 29 Mar 2015 18:03:07 -0400
+Subject: [PATCH 2/2] Display damage
+
+---
+ crawl-ref/source/beam.cc | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/crawl-ref/source/beam.cc b/crawl-ref/source/beam.cc
+index bcfcd97..b960b58 100644
+--- a/crawl-ref/source/beam.cc
++++ b/crawl-ref/source/beam.cc
+@@ -4967,10 +4967,11 @@ void bolt::affect_monster(monster* mon)
+         if (hit_verb.empty())
+             hit_verb = engulfs ? "engulfs" : "hits";
+ 
+-        mprf("The %s %s %s.",
++        mprf("The %s %s %s.(damage %d)",
+              name.c_str(),
+              hit_verb.c_str(),
+-             mon->name(DESC_THE).c_str());
++             mon->name(DESC_THE).c_str(),
++             postac);
+ 
+     }
+     else if (heard && !noise_msg.empty())
+-- 
+1.8.4
+

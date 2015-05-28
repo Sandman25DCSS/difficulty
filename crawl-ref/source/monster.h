@@ -94,6 +94,8 @@ public:
 
     bool went_unseen_this_turn;
     coord_def unseen_pos;
+    
+    int last_turn_it_was_seen_by_player;
 
 public:
     void set_new_monster_id();

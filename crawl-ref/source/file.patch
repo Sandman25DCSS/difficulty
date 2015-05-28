@@ -1,0 +1,127 @@
+From 79deb3e4d08abda1c8798c81923278c338bab46e Mon Sep 17 00:00:00 2001
+From: Sandman25 <sandman25@hotmail.com>
+Date: Tue, 10 Mar 2015 19:45:07 -0400
+Subject: [PATCH] New option "flash_screen_message"
+
+---
+ crawl-ref/source/initfile.cc | 11 +++++++----
+ crawl-ref/source/message.cc  | 23 ++++++++++++++++++++---
+ crawl-ref/source/options.h   |  1 +
+ 3 files changed, 28 insertions(+), 7 deletions(-)
+
+diff --git a/crawl-ref/source/initfile.cc b/crawl-ref/source/initfile.cc
+index 01950e3..275de7a 100644
+--- a/crawl-ref/source/initfile.cc
++++ b/crawl-ref/source/initfile.cc
+@@ -1134,6 +1134,7 @@ void game_options::reset_options()
+     auto_spell_letters.clear();
+     auto_item_letters.clear();
+     force_more_message.clear();
++    flash_screen_message.clear();
+     sound_mappings.clear();
+     menu_colour_mappings.clear();
+     message_colour_mappings.clear();
+@@ -2573,6 +2574,7 @@ void game_options::read_option_line(const string &str, bool runscript)
+         && key != "explore_stop_pickup_ignore"
+         && key != "stop_travel" && key != "sound"
+         && key != "force_more_message"
++        && key != "flash_screen_message"
+         && key != "drop_filter" && key != "lua_file" && key != "terp_file"
+         && key != "note_items" && key != "autoinscribe"
+         && key != "note_monsters" && key != "note_messages"
+@@ -3432,10 +3434,11 @@ void game_options::read_option_line(const string &str, bool runscript)
+     else BOOL_OPTION(use_fake_cursor);
+     else BOOL_OPTION(use_fake_player_cursor);
+     else BOOL_OPTION(show_player_species);
+-    else if (key == "force_more_message")
++    else if (key == "force_more_message" || key == "flash_screen_message")
+     {
++        vector<message_filter> &filters = (key == "force_more_message" ? force_more_message : flash_screen_message);
+         if (plain)
+-            force_more_message.clear();
++            filters.clear();
+ 
+         vector<message_filter> new_entries;
+         vector<string> fragments = split_string(",", field);
+@@ -3459,11 +3462,11 @@ void game_options::read_option_line(const string &str, bool runscript)
+             }
+ 
+             if (minus_equal)
+-                remove_matching(force_more_message, mf);
++                remove_matching(filters, mf);
+             else
+                 new_entries.push_back(mf);
+         }
+-        _merge_lists(force_more_message, new_entries, caret_equal);
++        _merge_lists(filters, new_entries, caret_equal);
+     }
+     else LIST_OPTION(drop_filter);
+     else if (key == "travel_avoid_terrain")
+diff --git a/crawl-ref/source/message.cc b/crawl-ref/source/message.cc
+index 78bc86b..471b7a3 100644
+--- a/crawl-ref/source/message.cc
++++ b/crawl-ref/source/message.cc
+@@ -1078,14 +1078,24 @@ void dprf(diag_type param, const char *format, ...)
+ 
+ static bool _updating_view = false;
+ 
+-static bool check_more(const string& line, msg_channel_type channel)
++static bool _check_option(const string& line, msg_channel_type channel, vector<message_filter> option)
+ {
+-    return any_of(begin(Options.force_more_message),
+-                  end(Options.force_more_message),
++    return any_of(begin(option),
++                  end(option),
+                   bind(mem_fn(&message_filter::is_filtered),
+                        placeholders::_1, channel, line));
+ }
+ 
++static bool check_more(const string& line, msg_channel_type channel)
++{
++    return _check_option(line, channel, Options.force_more_message);
++}
++
++static bool check_flash_screen(const string& line, msg_channel_type channel)
++{
++    return _check_option(line, channel, Options.flash_screen_message);
++}
++
+ static bool check_join(const string& line, msg_channel_type channel)
+ {
+     switch (channel)
+@@ -1237,6 +1247,7 @@ static void _mpr(string text, msg_channel_type channel, int param, bool nojoin,
+     }
+ 
+     bool domore = check_more(text, channel);
++    bool do_flash_screen = check_flash_screen(text, channel);
+     bool join = !domore && !nojoin && check_join(text, channel);
+ 
+     // Must do this before converting to formatted string and back;
+@@ -1265,6 +1276,12 @@ static void _mpr(string text, msg_channel_type channel, int param, bool nojoin,
+ 
+     if (domore)
+         more(true);
++    if (do_flash_screen)
++    {
++        flash_view(UA_HP, YELLOW);
++        scaled_delay(50);
++        flash_view(UA_HP, 0);
++    }
+ }
+ 
+ static string show_prompt(string prompt)
+diff --git a/crawl-ref/source/options.h b/crawl-ref/source/options.h
+index dddcc32..1f44b9e 100644
+--- a/crawl-ref/source/options.h
++++ b/crawl-ref/source/options.h
+@@ -269,6 +269,7 @@ public:
+     bool        arena_list_eq;
+ 
+     vector<message_filter> force_more_message;
++    vector<message_filter> flash_screen_message;
+ 
+     int         tc_reachable;   // Colour for squares that are reachable
+     int         tc_excluded;    // Colour for excluded squares.
+-- 
+1.8.4
+
