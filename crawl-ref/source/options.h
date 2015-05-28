@@ -400,6 +400,7 @@ public:
     int         fail_severity_to_confirm;
     int         turns_for_comes_into_view_again; // how many turns should pass for "comes into view again" message
     bool        display_numbers;
+#ifdef WIZARD
     // Parameters for fight simulations.
     string      fsim_mode;
     bool        fsim_csv;
