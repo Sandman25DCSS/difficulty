@@ -1,0 +1,41 @@
+From 4f6eb363c0f5b72fcc46aac2a3bbe6dda9eb3ae7 Mon Sep 17 00:00:00 2001
+From: Sandman25 <sandy12314@hotmail.com>
+Date: Thu, 25 Dec 2014 12:12:11 -0500
+Subject: [PATCH] Keeping last_pickup when swaping items
+
+---
+ crawl-ref/source/command.cc | 18 +++++++++++++++---
+ 1 file changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/crawl-ref/source/command.cc b/crawl-ref/source/command.cc
+index b5e18fa..55c0465 100644
+--- a/crawl-ref/source/command.cc
++++ b/crawl-ref/source/command.cc
+@@ -264,9 +264,21 @@ void swap_inv_slots(int from_slot, int to_slot, bool verbose)
+     else // just to make sure
+         you.redraw_quiver = true;
+ 
+-    // Remove the moved items from last_drop if they're there.
+-    you.last_pickup.erase(to_slot);
+-    you.last_pickup.erase(from_slot);
++    // Swap the moved items in last_pickup if they're there.
++    if (!you.last_pickup.empty())
++    {
++        auto &last_pickup = you.last_pickup;
++        auto to_iterator = last_pickup.find(to_slot);
++        int to_count = to_iterator == last_pickup.end() ? 0 : to_iterator->second;
++        auto from_iterator = last_pickup.find(from_slot);
++        int from_count = from_iterator == last_pickup.end() ? 0 : from_iterator->second;
++        last_pickup.erase(to_slot);
++        last_pickup.erase(from_slot);
++        if (from_count > 0)
++            last_pickup[to_slot] = from_count;
++        if (to_count > 0)
++            last_pickup[from_slot] = to_count;
++    }
+ }
+ 
+ static void _adjust_item()
+-- 
+1.8.4
+

@@ -1397,11 +1397,12 @@ bool melee_attack::player_aux_apply(unarmed_attack_type atk)
 
 void melee_attack::player_announce_aux_hit()
 {
-    mprf("You %s %s%s%s",
+    mprf("You %s %s%s%s(damage %d)",
          aux_verb.c_str(),
          defender->name(DESC_THE).c_str(),
          debug_damage_number().c_str(),
-         attack_strength_punctuation(damage_done).c_str());
+         attack_strength_punctuation(damage_done).c_str(),
+         damage_done);
 }
 
 string melee_attack::player_why_missed()
@@ -2436,11 +2437,11 @@ void melee_attack::announce_hit()
             verb_degree = " " + verb_degree;
         }
 
-        mprf("You %s %s%s%s%s",
+        mprf("You %s %s%s%s%s(damage %d)",
              attack_verb.c_str(),
              defender->name(DESC_THE).c_str(),
              verb_degree.c_str(), debug_damage_number().c_str(),
-             attack_strength_punctuation(damage_done).c_str());
+             attack_strength_punctuation(damage_done).c_str(), damage_done);
     }
 }
 

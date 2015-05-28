@@ -1,0 +1,201 @@
+From 948ed946c41eeb5401ecbcb8b7865fcc8d8b04bc Mon Sep 17 00:00:00 2001
+From: Sandman25 <sandman25@hotmail.com>
+Date: Wed, 18 Feb 2015 20:20:47 -0500
+Subject: [PATCH 1/2] Display "<Monster> comes into view again" message
+
+---
+ crawl-ref/source/delay.cc | 18 +++++++++---------
+ crawl-ref/source/state.cc | 12 +++++-------
+ 2 files changed, 14 insertions(+), 16 deletions(-)
+
+diff --git a/crawl-ref/source/delay.cc b/crawl-ref/source/delay.cc
+index 698e6db..01f8a3a 100644
+--- a/crawl-ref/source/delay.cc
++++ b/crawl-ref/source/delay.cc
+@@ -1371,27 +1371,27 @@ static inline bool _monster_warning(activity_interrupt_type ai,
+     {
+         return false;
+     }
+-    if (at.context != SC_NEWLY_SEEN && atype == DELAY_NOT_DELAYED)
++    if (at.context != SC_ALREADY_SEEN && at.context != SC_NEWLY_SEEN 
++        && atype == DELAY_NOT_DELAYED)
+         return false;
+-
+     ASSERT(at.apt == AIP_MONSTER);
+     monster* mon = at.mons_data;
+     if (!you.can_see(mon))
+         return false;
+-
+     // Disable message for summons.
+     if (mon->is_summoned() && atype == DELAY_NOT_DELAYED)
+         return false;
+ 
+     if (at.context == SC_ALREADY_SEEN || at.context == SC_UNCHARM)
+-    {
+-        // Only say "comes into view" if the monster wasn't in view
++    { 
++       // Only say "comes into view" if the monster wasn't in view
+         // during the previous turn.
+-        if (testbits(mon->flags, MF_WAS_IN_VIEW)
+-            && !(atype == DELAY_NOT_DELAYED))
++        if (!testbits(mon->flags, MF_WAS_IN_VIEW))
+         {
+-            mprf(MSGCH_WARN, "%s is too close now for your liking.",
+-                 mon->name(DESC_THE).c_str());
++            mprf(MSGCH_WARN, (atype != DELAY_NOT_DELAYED 
++                ? "%s is too close now for your liking."
++                : "%s comes into view again."),
++                mon->name(DESC_THE).c_str());
+         }
+     }
+     else if (mon->seen_context == SC_JUST_SEEN)
+diff --git a/crawl-ref/source/state.cc b/crawl-ref/source/state.cc
+index ed35d76..4b9926a 100644
+--- a/crawl-ref/source/state.cc
++++ b/crawl-ref/source/state.cc
+@@ -227,14 +227,12 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
+         crawl_state.cancel_cmd_repeat();
+ 
+ #ifndef DEBUG_DIAGNOSTICS
+-        if (at.context == SC_NEWLY_SEEN)
+-        {
+-            monster_info mi(mon);
+-            set_auto_exclude(mon);
++        monster_info mi(mon);
++        set_auto_exclude(mon);
+ 
+-            mprf(MSGCH_WARN, "%s comes into view.",
+-                 get_monster_equipment_desc(mi, DESC_WEAPON).c_str());
+-        }
++        mprf(MSGCH_WARN, "%s comes into view%s", 
++            get_monster_equipment_desc(mi, DESC_WEAPON).c_str(),
++            (at.context == SC_NEWLY_SEEN ? "." : " again."));
+ 
+         if (crawl_state.game_is_hints())
+             hints_monster_seen(*mon);
+-- 
+1.8.4
+
+
+From 4bfeed5b06c10850a70a4651fd704d0e905cb897 Mon Sep 17 00:00:00 2001
+From: Sandman25 <sandman25@hotmail.com>
+Date: Thu, 19 Feb 2015 20:51:09 -0500
+Subject: [PATCH 2/2] turn-based warning "comes into view"
+
+---
+ crawl-ref/source/delay.cc    |  8 +++++++-
+ crawl-ref/source/initfile.cc |  2 ++
+ crawl-ref/source/monster.h   |  2 ++
+ crawl-ref/source/options.h   |  1 +
+ crawl-ref/source/state.cc    | 17 +++++++++++++----
+ 5 files changed, 25 insertions(+), 5 deletions(-)
+
+diff --git a/crawl-ref/source/delay.cc b/crawl-ref/source/delay.cc
+index 01f8a3a..3e3631d 100644
+--- a/crawl-ref/source/delay.cc
++++ b/crawl-ref/source/delay.cc
+@@ -1386,13 +1386,18 @@ static inline bool _monster_warning(activity_interrupt_type ai,
+     { 
+        // Only say "comes into view" if the monster wasn't in view
+         // during the previous turn.
+-        if (!testbits(mon->flags, MF_WAS_IN_VIEW))
++        if ((atype != DELAY_NOT_DELAYED || 
++            (Options.turns_for_comes_into_view_again > 0
++            && you.num_turns - mon->last_turn_it_was_seen_by_player 
++            > Options.turns_for_comes_into_view_again))
++            && !testbits(mon->flags, MF_WAS_IN_VIEW))
+         {
+             mprf(MSGCH_WARN, (atype != DELAY_NOT_DELAYED 
+                 ? "%s is too close now for your liking."
+                 : "%s comes into view again."),
+                 mon->name(DESC_THE).c_str());
+         }
++        mon->last_turn_it_was_seen_by_player = you.num_turns;
+     }
+     else if (mon->seen_context == SC_JUST_SEEN)
+         return false;
+@@ -1410,6 +1415,7 @@ static inline bool _monster_warning(activity_interrupt_type ai,
+                                  short_ghost_description(mon).c_str());
+         }
+         set_auto_exclude(mon);
++        mon->last_turn_it_was_seen_by_player = you.num_turns;
+ 
+         if (at.context == SC_DOOR)
+             text += " opens the door.";
+diff --git a/crawl-ref/source/initfile.cc b/crawl-ref/source/initfile.cc
+index f08a789..3b85bed 100644
+--- a/crawl-ref/source/initfile.cc
++++ b/crawl-ref/source/initfile.cc
+@@ -819,6 +819,7 @@ void game_options::reset_options()
+     note_hp_percent        = 5;
+ 
+     fail_severity_to_confirm = 3;
++    turns_for_comes_into_view_again = -1;
+ 
+     clear_messages         = false;
+ #ifdef TOUCH_UI
+@@ -3871,6 +3872,7 @@ void game_options::read_option_line(const string &str, bool runscript)
+     else BOOL_OPTION(arena_dump_msgs_all);
+     else BOOL_OPTION(arena_list_eq);
+     else INT_OPTION(fail_severity_to_confirm, -1, 3);
++    else INT_OPTION(turns_for_comes_into_view_again, -1, INT_MAX);
+ 
+     // Catch-all else, copies option into map
+     else if (runscript)
+diff --git a/crawl-ref/source/monster.h b/crawl-ref/source/monster.h
+index 302b4cc..8ccf79b 100644
+--- a/crawl-ref/source/monster.h
++++ b/crawl-ref/source/monster.h
+@@ -94,6 +94,8 @@ public:
+ 
+     bool went_unseen_this_turn;
+     coord_def unseen_pos;
++    
++    int last_turn_it_was_seen_by_player;
+ 
+ public:
+     void set_new_monster_id();
+diff --git a/crawl-ref/source/options.h b/crawl-ref/source/options.h
+index a147d60..dddcc32 100644
+--- a/crawl-ref/source/options.h
++++ b/crawl-ref/source/options.h
+@@ -389,6 +389,7 @@ public:
+ 
+     // -1 and 0 mean no confirmation, other possible values are 1,2,3 (see fail_severity())
+     int         fail_severity_to_confirm;
++    int         turns_for_comes_into_view_again; // how many turns should pass for "comes into view again" message
+ #ifdef WIZARD
+     // Parameters for fight simulations.
+     string      fsim_mode;
+diff --git a/crawl-ref/source/state.cc b/crawl-ref/source/state.cc
+index 4b9926a..6e950989 100644
+--- a/crawl-ref/source/state.cc
++++ b/crawl-ref/source/state.cc
+@@ -228,11 +228,20 @@ bool interrupt_cmd_repeat(activity_interrupt_type ai,
+ 
+ #ifndef DEBUG_DIAGNOSTICS
+         monster_info mi(mon);
+-        set_auto_exclude(mon);
++        
++        int last_turn_it_was_seen_by_player = 0;
+ 
+-        mprf(MSGCH_WARN, "%s comes into view%s", 
+-            get_monster_equipment_desc(mi, DESC_WEAPON).c_str(),
+-            (at.context == SC_NEWLY_SEEN ? "." : " again."));
++        if (at.context == SC_NEWLY_SEEN)
++            set_auto_exclude(mon);
++        else
++            last_turn_it_was_seen_by_player = mon-> last_turn_it_was_seen_by_player;
++        if (at.context == SC_NEWLY_SEEN 
++            || (Options.turns_for_comes_into_view_again > 0 
++            && you.num_turns - last_turn_it_was_seen_by_player 
++            > Options.turns_for_comes_into_view_again))
++            mprf(MSGCH_WARN, "%s comes into view%s", 
++                get_monster_equipment_desc(mi, DESC_WEAPON).c_str(),
++                (at.context == SC_NEWLY_SEEN ? "." : " again."));
+ 
+         if (crawl_state.game_is_hints())
+             hints_monster_seen(*mon);
+-- 
+1.8.4
+

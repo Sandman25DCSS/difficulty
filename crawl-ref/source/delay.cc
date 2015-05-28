@@ -1391,29 +1391,34 @@ static inline bool _monster_warning(activity_interrupt_type ai,
     {
         return false;
     }
-    if (at.context != SC_NEWLY_SEEN && atype == DELAY_NOT_DELAYED)
+    if (at.context != SC_ALREADY_SEEN && at.context != SC_NEWLY_SEEN 
+        && atype == DELAY_NOT_DELAYED)
         return false;
-
     ASSERT(at.apt == AIP_MONSTER);
     monster* mon = at.mons_data;
     ASSERT(mon);
     if (!you.can_see(*mon))
         return false;
-
     // Disable message for summons.
     if (mon->is_summoned() && atype == DELAY_NOT_DELAYED)
         return false;
 
     if (at.context == SC_ALREADY_SEEN || at.context == SC_UNCHARM)
-    {
-        // Only say "comes into view" if the monster wasn't in view
+    { 
+       // Only say "comes into view" if the monster wasn't in view
         // during the previous turn.
-        if (testbits(mon->flags, MF_WAS_IN_VIEW)
-            && !(atype == DELAY_NOT_DELAYED))
+        if ((atype != DELAY_NOT_DELAYED || 
+            (Options.turns_for_comes_into_view_again > 0
+            && you.num_turns - mon->last_turn_it_was_seen_by_player 
+            > Options.turns_for_comes_into_view_again))
+            && !testbits(mon->flags, MF_WAS_IN_VIEW))
         {
-            mprf(MSGCH_WARN, "%s is too close now for your liking.",
-                 mon->name(DESC_THE).c_str());
+            mprf(MSGCH_WARN, (atype != DELAY_NOT_DELAYED 
+                ? "%s is too close now for your liking."
+                : "%s comes into view again."),
+                mon->name(DESC_THE).c_str());
         }
+        mon->last_turn_it_was_seen_by_player = you.num_turns;
     }
     else if (mon->seen_context == SC_JUST_SEEN)
         return false;
@@ -1431,6 +1436,7 @@ static inline bool _monster_warning(activity_interrupt_type ai,
                                  short_ghost_description(mon).c_str());
         }
         set_auto_exclude(mon);
+        mon->last_turn_it_was_seen_by_player = you.num_turns;
 
         if (at.context == SC_DOOR)
             text += " opens the door.";
