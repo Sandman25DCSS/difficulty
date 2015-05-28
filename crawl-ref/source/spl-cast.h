@@ -88,7 +88,9 @@ void inspect_spells();
 void do_cast_spell_cmd(bool force);
 
 int hex_success_chance(const int mr, int powc, int scale);
+int damaging_spell_to_hit_chance(const int ev, int to_hit);
 vector<string> desc_success_chance(const monster_info& mi, int pow);
+vector<string> desc_damaging_spell_to_hit_chance(const monster_info& mi, int to_hit);
 spret_type your_spells(spell_type spell, int powc = 0, bool allow_fail = true,
     bool evoked = false);
 
