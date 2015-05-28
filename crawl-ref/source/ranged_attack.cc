@@ -842,7 +842,7 @@ void ranged_attack::announce_hit()
     if (!needs_message)
         return;
 
-    mprf("%s %s %s%s%s%s",
+    mprf("%s %s %s%s%s%s(damage %d)",
          projectile->name(DESC_THE).c_str(),
          attack_verb.c_str(),
          defender_name(false).c_str(),
@@ -850,5 +850,6 @@ void ranged_attack::announce_hit()
              ? " in a vulnerable spot"
              : "",
          debug_damage_number().c_str(),
-         attack_strength_punctuation(damage_done).c_str());
+         attack_strength_punctuation(damage_done).c_str(),
+         damage_done);
 }
