@@ -2560,6 +2560,12 @@ void define_monster(monster* mons)
         hp     = hit_points(hd, m->hpdice[1], m->hpdice[2]);
         hp    += m->hpdice[3];
     }
+    
+    hp = hp * Options.monster_hp_difficulty / 100;
+    
+    if (hp == 0)
+        hp = 1;
+    
     hp_max = hp;
 
     // So let it be written, so let it be done.
