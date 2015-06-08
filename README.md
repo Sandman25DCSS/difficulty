@@ -2,7 +2,7 @@
 DCSS with difficulty option and some other changes.
 
 1) monster_hp_difficulty=100
-Possible values are 1-1000
+Possible values are 1-1000 
 Monster HP is changed as
 hp = hp * monster_hp_difficulty / 100;
 Default is 100.
