@@ -19,6 +19,7 @@ Cannot be hidden
 Cannot be hidden
 
 5) confirm_action += Borg
+
 confirm_action += Death's Door
 
 You will get confirmation dialog before casting the spells
