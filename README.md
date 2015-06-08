@@ -22,5 +22,5 @@ Cannot be hidden
 
 confirm_action += Death's Door
 
-You will get confirmation dialog before casting the spells
+You will get confirmation dialog before casting the spells. This option is case-sensitive.
 Default is none
