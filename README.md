@@ -24,3 +24,5 @@ confirm_action += Death's Door
 
 You will get confirmation dialog before casting the spells. This option is case-sensitive.
 Default is none
+
+Full Windows 64 bit version can be downloaded at https://www.dropbox.com/s/wi29ym1ckhhpdz2/crawl_full.zip?dl=0
