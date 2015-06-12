@@ -3344,6 +3344,10 @@ static void _print_bar(int value, int max, int scale,
  */
 static void _describe_monster_ac(const monster_info& mi, ostringstream &result)
 {
+    if (Options.display_numbers) {
+        result << "AC " << mi.ac << "\n";
+        return;
+    }
     // max ac 40 (dispater)
     _print_bar(mi.ac, 40, 5, "AC", result);
 }
@@ -3356,6 +3360,10 @@ static void _describe_monster_ac(const monster_info& mi, ostringstream &result)
  */
 static void _describe_monster_ev(const monster_info& mi, ostringstream &result)
 {
+    if (Options.display_numbers) {
+        result << "EV " << mi.ev << "\n";
+        return;
+    }
     // max ev 30 (eresh) (also to make space for parens)
     _print_bar(mi.ev, 30, 5, "EV", result, mi.base_ev);
 }
@@ -3371,6 +3379,11 @@ static void _describe_monster_mr(const monster_info& mi, ostringstream &result)
     if (mi.res_magic() == MAG_IMMUNE)
     {
         result << "MR ∞";
+        return;
+    }
+    
+    if (Options.display_numbers) {
+        result << "MR " << mi.res_magic();
         return;
     }
 

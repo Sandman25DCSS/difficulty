@@ -398,7 +398,8 @@ public:
 
     // -1 and 0 mean no confirmation, other possible values are 1,2,3 (see fail_severity())
     int         fail_severity_to_confirm;
-#ifdef WIZARD
+    int         turns_for_comes_into_view_again; // how many turns should pass for "comes into view again" message
+    bool        display_numbers;
     // Parameters for fight simulations.
     string      fsim_mode;
     bool        fsim_csv;
