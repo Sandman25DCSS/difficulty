@@ -819,6 +819,7 @@ void game_options::reset_options()
 
     fail_severity_to_confirm = 3;
     turns_for_comes_into_view_again = -1;
+    display_numbers        = false;
 
     clear_messages         = false;
 #ifdef TOUCH_UI
@@ -3866,6 +3867,7 @@ void game_options::read_option_line(const string &str, bool runscript)
     else BOOL_OPTION(arena_list_eq);
     else INT_OPTION(fail_severity_to_confirm, -1, 3);
     else INT_OPTION(turns_for_comes_into_view_again, -1, INT_MAX);
+    else BOOL_OPTION(display_numbers);
 
     // Catch-all else, copies option into map
     else if (runscript)
