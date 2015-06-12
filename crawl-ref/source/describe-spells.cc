@@ -383,10 +383,10 @@ static void _describe_book(const spellbook_contents &book,
                                   ' ';
         if (hd > 0 && (get_spell_flags(spell) & SPFLAG_MR_CHECK))
         {
-            description.cprintf("%c - (%d%%)%s",
+            description.cprintf("%c - %d%% %s",
                             spell_letter,
                             hex_chance(spell, hd),
-                            chop_string(spell_title(spell), 23).c_str());
+                            chop_string(spell_title(spell), 24).c_str());
         } else {
             description.cprintf("%c - %s",
                             spell_letter,
