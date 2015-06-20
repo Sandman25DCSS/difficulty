@@ -1142,6 +1142,7 @@ void game_options::reset_options()
     flash_screen_message.clear();
     confirm_action.clear();
     monster_hp_difficulty = 100;
+    monster_xp_difficulty = 100;
     sound_mappings.clear();
     menu_colour_mappings.clear();
     message_colour_mappings.clear();
@@ -3454,6 +3455,7 @@ void game_options::read_option_line(const string &str, bool runscript)
     }
     else LIST_OPTION(confirm_action);
     else INT_OPTION(monster_hp_difficulty, 1, 1000);
+    else INT_OPTION(monster_xp_difficulty, 1, 1000);
     else LIST_OPTION(drop_filter);
     else if (key == "travel_avoid_terrain")
     {

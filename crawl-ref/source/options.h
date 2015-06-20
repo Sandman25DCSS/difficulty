@@ -273,6 +273,7 @@ public:
     vector<text_pattern> confirm_action;
     
     int monster_hp_difficulty;
+    int monster_xp_difficulty;
 
     int         tc_reachable;   // Colour for squares that are reachable
     int         tc_excluded;    // Colour for excluded squares.
