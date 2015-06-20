@@ -2039,7 +2039,7 @@ int exper_value(const monster* mon, bool real)
     if (!mons_class_gives_xp(mc))
         return 0;
 
-    x_val = (16 + maxhp) * hd * hd / 10;
+    x_val = (16 + maxhp * 100 / Options.monster_xp_difficulty) * hd * hd / 10;
 
     // Let's calculate a simple difficulty modifier. - bwr
     int diff = 0;
