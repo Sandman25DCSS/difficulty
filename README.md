@@ -36,4 +36,4 @@ You will get confirmation dialog before casting the spells. This option is case-
 Default is none
 
 
-Full Windows 64 bit version can be downloaded at https://www.dropbox.com/s/38nl5v2w947cz45/cralw_full_20150619.zip?dl=0
+Full Windows 64 bit version can be downloaded at https://www.dropbox.com/s/7ufdv1a2qbn6bvt/crawl_full_20150619.zip?dl=0
