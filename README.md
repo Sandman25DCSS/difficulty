@@ -35,5 +35,9 @@ confirm_action += Death's Door
 You will get confirmation dialog before casting the spells. This option is case-sensitive.
 Default is none
 
+6) display_numbers = true
 
+You will see AC/EV/MR as numbers instead of bars. Something like this:
+
+http://i62.tinypic.com/4lfv3c.png
 Full Windows 64 bit version can be downloaded at https://www.dropbox.com/s/7ufdv1a2qbn6bvt/crawl_full_20150619.zip?dl=0
