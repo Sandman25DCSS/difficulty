@@ -18,7 +18,6 @@
 #include "adjust.h"
 #include "art-enum.h"
 #include "artefact.h"
-#include "art-enum.h"
 #include "branch.h"
 #include "butcher.h"
 #include "cloud.h" // cloud_type_name
@@ -1356,6 +1355,7 @@ static string _describe_armour(const item_def &item, bool verbose)
     const int ego = get_armour_ego_type(item);
     const bool enchanted = get_equip_desc(item) && ego == SPARM_NORMAL
                            && !item_ident(item, ISFLAG_KNOW_PLUSES);
+
     if ((ego != SPARM_NORMAL || enchanted) && item_type_known(item) && verbose)
     {
         description += "\n\n";
@@ -1467,12 +1467,6 @@ static string _describe_armour(const item_def &item, bool verbose)
         // Can't happen, right? (XXX)
         if (!item_ident(item, ISFLAG_KNOW_PROPERTIES) && item_type_known(item))
             description += "\nThis armour may have some hidden properties.";
-        if (is_unrandom_artefact(item)
-            && item.unrand_idx == UNRAND_WARLOCK_MIRROR)
-        {
-            int reflect_chance = 100 * player_shield_class() / (player_shield_class() + 40);
-            description += "\n\nThe shield has " + to_string(reflect_chance) + "% chance to reflect enchantments.";
-        }
     }
     else
     {
